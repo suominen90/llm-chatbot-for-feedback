@@ -39,28 +39,21 @@ def main():
         store.add_texts(load_twitter_data(100))
         st.session_state.store = store
 
-    question = 'what airline is the worst?'
-    docs = st.session_state.store.search(question)
-    st.write("### Retrieved Documents:")
-    for d in docs:
-        st.write("- ", d)
-    answer = answer_question(question, docs)
-    st.write("### Answer:")
-    st.write(answer)
+    question = st.text_input("Ask something:")
+
+    if st.button("Ask"):
+        with st.spinner("Thinking..."):
+            docs = st.session_state.store.search(question)
+            answer = answer_question(question, docs)
+
+            st.write("### Answer:")
+            st.write(answer)
+
+            st.write("---")
+            st.write("### Retrieved Documents:")
+            for d in docs:
+                st.write("- ", d)
 
 main()
 
-# question = st.text_input("Ask something:")
 
-# if st.button("Ask"):
-#     with st.spinner("Thinking..."):
-#         docs = st.session_state.store.search(question)
-#         answer = answer_question(question, docs)
-
-#         st.write("### Answer:")
-#         st.write(answer)
-
-#         st.write("---")
-#         st.write("### Retrieved Documents:")
-#         for d in docs:
-#             st.write("- ", d)

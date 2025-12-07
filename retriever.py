@@ -53,7 +53,7 @@ class VectorStore:
             ids=ids
         )
 
-    def search(self, query: str, k: int = 4) -> List[str]:
+    def search(self, query: str, k: int = 100) -> List[str]:
         # Create embedding for query (single input -> still pass as list)
         q_resp = mistral_client.embeddings.create(
             model="mistral-embed",
