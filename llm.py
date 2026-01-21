@@ -1,11 +1,15 @@
-from mistralai import Mistral
+#from mistralai import Mistral
+#from geminiai import Gemini
+from google import genai
 
 import dotenv
 import os
 
 dotenv.load_dotenv()
 
-client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
+# The client gets the API key from the environment variable `GEMINI_API_KEY`.
+client = genai.Client()
+#client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
 
 def answer_question(query, retrieved_docs):
     context = "\n\n".join(retrieved_docs)
@@ -22,12 +26,13 @@ def answer_question(query, retrieved_docs):
     If the answer is not in the context, say you don't know.
     """
 
-    response = client.chat.complete(
-        model="mistral-large-latest",
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
+    # Use generate_content for Gemini
+    response = client.models.generate_content(
+        model="gemini-2.0-flash", # or "gemini-1.5-pro"
+        contents=prompt
     )
+
+    return response.text
 
     #return response.choices[0].message["content"]
     return response.choices[0].message

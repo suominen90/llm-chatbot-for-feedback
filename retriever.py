@@ -1,7 +1,8 @@
 
 # retriever.py
 import chromadb
-from mistralai import Mistral
+#from mistralai import Mistral
+from google import genai
 from typing import List
 import dotenv
 import os
@@ -11,7 +12,7 @@ dotenv.load_dotenv()
 # create a single long-lived client (or use 'with Mistral(...) as client:' if you prefer context manager)
 
 #print(os.getenv("MISTRAL_API_KEY"))
-mistral_client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))  # will use MISTRAL_API_KEY env var if None
+genai_client = genai.Client()  # will use GEMINI_API_KEY env var if None
 
 class VectorStore:
     def __init__(self, collection_name="docs"):
@@ -32,13 +33,12 @@ class VectorStore:
             return
 
         # Get embeddings in batch — NOTE: parameter name is `inputs`
-        resp = mistral_client.embeddings.create(
-            model="mistral-embed",
-            inputs=texts
+        resp = genai_client.models.embed_content(
+            model="gemini-embedding-001",
+            contents=texts
         )
 
-        # resp.data is a list of objects; each has `.embedding`
-        embeddings = [item.embedding for item in resp.data]
+        embedding_list = [embedding.values for embedding in resp.embeddings]
 
         # Build ids if not provided
         if ids is None:
@@ -49,17 +49,17 @@ class VectorStore:
         # Add to Chroma collection
         self.collection.add(
             documents=texts,
-            embeddings=embeddings,
+            embeddings=embedding_list,
             ids=ids
         )
 
     def search(self, query: str, k: int = 100) -> List[str]:
         # Create embedding for query (single input -> still pass as list)
-        q_resp = mistral_client.embeddings.create(
-            model="mistral-embed",
-            inputs=[query]
+        q_resp = genai_client.models.embed_content(
+            model="gemini-embedding-001",
+            contents=[query]
         )
-        q_emb = q_resp.data[0].embedding
+        q_emb = q_resp.embeddings[0].values
 
         result = self.collection.query(
             query_embeddings=[q_emb],
